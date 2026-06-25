@@ -3,6 +3,7 @@ from django.utils.timezone import make_aware
 from django.utils.dateparse import parse_datetime
 from todo.models import Task
 
+
 # Create your views here.
 def index(request):
     if request.method == "POST":
@@ -16,6 +17,6 @@ def index(request):
         tasks = Task.objects.order_by("-posted_at")
 
     context = {
-        "tasks" : tasks
+        "tasks": tasks
     }
     return render(request, "todo/index.html", context)
