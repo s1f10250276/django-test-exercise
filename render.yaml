@@ -6,7 +6,7 @@ databases:
 
 services:
   - type: web
-    name: django-test-web-ry-delete
+    name: djangonotestnotamenoweb
     env: python
     plan: free
     branch: main
