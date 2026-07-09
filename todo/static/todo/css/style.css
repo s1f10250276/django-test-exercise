@@ -26,6 +26,13 @@ input, button {
   margin-top: 0.3rem;
 }
 
+input {
+  background-color: #fff;
+  color: #223;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+}
+
 button {
   background-color: #3498db;
   color: white;
@@ -45,4 +52,39 @@ a {
 
 a:hover {
   text-decoration: underline;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    color: #e5e7eb;
+    background-color: #111827;
+  }
+
+  h1 {
+    color: #f9fafb;
+    border-bottom-color: #374151;
+  }
+
+  form, .text {
+    background: #1f2937;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  }
+
+  input {
+    background-color: #374151;
+    color: #f9fafb;
+    border-color: #4b5563;
+  }
+
+  button {
+    background-color: #2563eb;
+  }
+
+  button:hover {
+    background-color: #1d4ed8;
+  }
+
+  a {
+    color: #60a5fa;
+  }
 }
