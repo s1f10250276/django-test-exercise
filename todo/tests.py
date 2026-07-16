@@ -154,6 +154,7 @@ class TodoViewTestCase(TestCase):
         response = client.post('/1/close/')
 
         self.assertEqual(response.status_code, 404)
+
     def test_delete_task(self):
         task = Task(title="task1")
         task.save()

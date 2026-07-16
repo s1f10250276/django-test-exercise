@@ -71,6 +71,7 @@ def update(request, task_id):
     }
     return render(request, "todo/edit.html", context)
 
+
 def delete(request, task_id):
     try:
         task = Task.objects.get(pk=task_id)
@@ -86,7 +87,7 @@ def update_order(request):
     try:
         data = json.loads(request.body)
         task_ids = data.get('task_ids', [])
-        
+
         for index, task_id in enumerate(task_ids):
             try:
                 task = Task.objects.get(pk=task_id)
@@ -94,7 +95,7 @@ def update_order(request):
                 task.save()
             except Task.DoesNotExist:
                 pass
-        
+
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
