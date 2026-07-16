@@ -11,7 +11,7 @@ class Task(models.Model):
         (4, 'Very High'),
         (5, 'Critical'),
     ]
-    
+
     title = models.CharField(max_length=100)
     completed = models.BooleanField(default=False)
     posted_at = models.DateTimeField(default=timezone.now)
