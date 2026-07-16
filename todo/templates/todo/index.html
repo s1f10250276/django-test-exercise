@@ -7,6 +7,135 @@
     <meta charset="UTF-8">
     <meta name="author" content="INIAD">
     <link rel="stylesheet" href="{% static 'todo/css/style.css' %}">
+    <style>
+      .task-list {
+        list-style: none;
+        padding: 0;
+        margin: 20px 0;
+      }
+      
+      .task-item {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        margin: 10px 0;
+        background-color: #f5f5f5;
+        border-left: 5px solid #007bff;
+        cursor: move;
+        transition: all 0.3s ease;
+      }
+      
+      .task-item:hover {
+        background-color: #efefef;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+      
+      .task-item.dragging {
+        opacity: 0.5;
+        transform: scale(0.95);
+      }
+      
+      .task-item.drag-over {
+        border-top: 3px solid #28a745;
+        border-bottom: 3px solid #28a745;
+      }
+      
+      .priority-indicator {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        margin-right: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+        font-size: 12px;
+      }
+      
+      .priority-1 { background-color: #28a745; } /* Low */
+      .priority-2 { background-color: #17a2b8; } /* Medium */
+      .priority-3 { background-color: #ffc107; color: black; } /* High */
+      .priority-4 { background-color: #fd7e14; } /* Very High */
+      .priority-5 { background-color: #dc3545; } /* Critical */
+      
+      .task-content {
+        flex: 1;
+      }
+      
+      .task-content h2 {
+        margin: 0 0 8px 0;
+        font-size: 18px;
+      }
+      
+      .task-content h2 a {
+        text-decoration: none;
+        color: #333;
+      }
+      
+      .task-content h2 a:hover {
+        color: #007bff;
+      }
+      
+      .task-meta {
+        font-size: 12px;
+        color: #666;
+        margin: 0;
+      }
+      
+      .task-meta li {
+        display: inline;
+        margin-right: 20px;
+      }
+      
+      .task-meta li:before {
+        content: "• ";
+        margin-right: 5px;
+      }
+      
+      .task-meta li:first-child:before {
+        content: "";
+        margin-right: 0;
+      }
+      
+      #priority-select {
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      
+      form button {
+        padding: 8px 16px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      
+      form button:hover {
+        background-color: #0056b3;
+      }
+      
+      .sort-links {
+        margin: 15px 0;
+      }
+      
+      .sort-links a {
+        display: inline-block;
+        padding: 8px 12px;
+        margin-right: 10px;
+        background-color: #e9ecef;
+        color: #333;
+        text-decoration: none;
+        border-radius: 4px;
+      }
+      
+      .sort-links a:hover {
+        background-color: #dee2e6;
+      }
+    </style>
   </head>
 
   <body>
@@ -16,7 +145,17 @@
       {% csrf_token %}
       <div>
         <label for="titleInput">Title</label><br>
-        <input id="titleInput" name="title" type="text" placeholder="Input title">
+        <input id="titleInput" name="title" type="text" placeholder="Input title" required>
+      </div>
+      <div>
+        <label for="priorityInput">Priority:</label><br>
+        <select id="priorityInput" name="priority">
+          <option value="1">Low</option>
+          <option value="2">Medium</option>
+          <option value="3" selected>High</option>
+          <option value="4">Very High</option>
+          <option value="5">Critical</option>
+        </select>
       </div>
       <div>
         <label for="dueInput">Due at:</label><br>
@@ -28,27 +167,118 @@
     </form>
     <br>
 
-    <div>
-      <a href="{% url 'index' %}?order=due">Sort by Due Date</a> |
-      <a href="{% url 'index' %}?order=post">Sort by Posted Date</a>
+    <div class="sort-links">
+      <a href="{% url 'index' %}?order=priority">Sort by Priority</a>
+      <a href="{% url 'index' %}?order=due">Sort by Due Date</a>
+      <a href="{% url 'index' %}?order=posted">Sort by Posted Date</a>
     </div>
 
-    {% for task in tasks %}
-    <div class="text">
-      <h2><a href="{% url 'detail' task.id %}">{{ task.title }}</a></h2>
-      <ul>
-        <li>Posted at: {{ task.posted_at }}</li>
-        {% if task.due_at %} 
-        <li>Due at: {{ task.due_at }}</li>
-        {% endif %}
-        {% if task.completed %} 
-        <li>Status: Completed</li>
-        {% else %}
-        <li>Status: Not Completed</li>
-        {% endif %}
-      </ul>
-    </div>
-    {% endfor %}
+    <ul class="task-list" id="taskList">
+      {% for task in tasks %}
+      <li class="task-item" draggable="true" data-task-id="{{ task.id }}">
+        <div class="priority-indicator priority-{{ task.priority }}">{{ task.priority }}</div>
+        <div class="task-content">
+          <h2><a href="{% url 'detail' task.id %}">{{ task.title }}</a></h2>
+          <ul class="task-meta">
+            <li>Posted: {{ task.posted_at|date:"Y-m-d H:i" }}</li>
+            {% if task.due_at %} 
+            <li>Due: {{ task.due_at|date:"Y-m-d H:i" }}</li>
+            {% endif %}
+            {% if task.completed %} 
+            <li><strong>✓ Completed</strong></li>
+            {% else %}
+            <li>Status: Not Completed</li>
+            {% endif %}
+          </ul>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <script>
+      let draggedElement = null;
+
+      const taskList = document.getElementById('taskList');
+      const taskItems = document.querySelectorAll('.task-item');
+
+      taskItems.forEach(item => {
+        item.addEventListener('dragstart', function() {
+          draggedElement = this;
+          this.classList.add('dragging');
+        });
+
+        item.addEventListener('dragend', function() {
+          this.classList.remove('dragging');
+          taskItems.forEach(i => i.classList.remove('drag-over'));
+          draggedElement = null;
+        });
+
+        item.addEventListener('dragover', function(e) {
+          e.preventDefault();
+          if (this !== draggedElement) {
+            this.classList.add('drag-over');
+          }
+        });
+
+        item.addEventListener('dragleave', function() {
+          this.classList.remove('drag-over');
+        });
+
+        item.addEventListener('drop', function(e) {
+          e.preventDefault();
+          if (this !== draggedElement) {
+            // Swap elements
+            if (draggedElement.compareDocumentPosition(this) === Node.DOCUMENT_POSITION_FOLLOWING) {
+              this.parentNode.insertBefore(draggedElement, this);
+            } else {
+              this.parentNode.insertBefore(draggedElement, this.nextSibling);
+            }
+            
+            // Save new order to server
+            saveTaskOrder();
+          }
+          this.classList.remove('drag-over');
+        });
+      });
+
+      function saveTaskOrder() {
+        const taskItems = document.querySelectorAll('.task-item');
+        const taskIds = Array.from(taskItems).map(item => item.getAttribute('data-task-id'));
+        
+        fetch('{% url "update_order" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify({
+            task_ids: taskIds
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            console.log('Task order updated successfully');
+          }
+        })
+        .catch(error => console.error('Error:', error));
+      }
+
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+    </script>
   </body>
 
 </html>
