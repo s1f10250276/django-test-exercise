@@ -6,10 +6,23 @@
     <title>To Do Application</title>
     <meta charset="UTF-8">
     <meta name="author" content="INIAD">
+    <meta name="color-scheme" content="light dark">
     <link rel="stylesheet" href="{% static 'todo/css/style.css' %}">
   </head>
 
   <body>
+    <div class="theme-switcher">
+      <label for="theme-select">Theme</label>
+      <select id="theme-select" name="theme">
+        <option value="blue">青</option>
+        <option value="red">赤</option>
+        <option value="yellow">黄</option>
+        <option value="green">緑</option>
+        <option value="white">白</option>
+        <option value="black">黒</option>
+      </select>
+    </div>
+
     <h1>{{ task.title }}</h1>
     <ul>
       <li>Posted at: {{ task.posted_at }}</li>
@@ -29,6 +42,8 @@
         <a href="{% url 'delete' task.id %}">Delete</a>
       <a href="{% url 'close' task.id %}">Close</a>
     </div>
+
+    <script src="{% static 'todo/js/theme.js' %}"></script>
   </body>
 
 </html>
