@@ -11,24 +11,34 @@ from todo.models import Task
 def index(request):
     if request.method == "POST":
         priority = request.POST.get("priority", 3)
-        task = Task(title=request.POST["title"],
-                    due_at=make_aware(parse_datetime(request.POST["due_at"])),
-                    priority=int(priority))
+        task = Task(
+            title=request.POST["title"],
+            due_at=make_aware(parse_datetime(request.POST["due_at"])),
+            priority=int(priority),
+        )
         task.save()
 
+    query = request.GET.get("q", "").strip()
+    tasks = Task.objects.all()
+
+    # 1. 検索フィルタリング
+    if query:
+        tasks = tasks.filter(title__icontains=query)
+
+    # 2. 並び替え（Task.objects ではなく、フィルタ済みの tasks に対して行う）
     order_by = request.GET.get("order", "priority")
     if order_by == "due":
-        tasks = Task.objects.order_by("due_at")
+        tasks = tasks.order_by("due_at")
     elif order_by == "posted":
-        tasks = Task.objects.order_by("-posted_at")
+        tasks = tasks.order_by("-posted_at")
     else:  # default to priority
-        tasks = Task.objects.order_by("-priority", "-posted_at")
+        tasks = tasks.order_by("-priority", "-posted_at")
 
     context = {
-        "tasks": tasks
+        "tasks": tasks,
+        "query": query,
     }
     return render(request, "todo/index.html", context)
-
 
 def detail(request, task_id):
     try:

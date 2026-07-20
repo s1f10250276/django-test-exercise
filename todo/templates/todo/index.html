@@ -52,6 +52,20 @@
     </form>
     <br>
 
+    <form action="{% url 'index' %}" method="get">
+      <div>
+        <label for="searchInput">Search</label><br>
+        <input id="searchInput" name="q" type="text" value="{{ query }}" placeholder="Search by title">
+      </div>
+      <div>
+        <button type="submit">Search</button>
+      </div>
+    </form>
+    <br>
+
+    <div>
+      <a href="{% url 'index' %}?order=due{% if query %}&q={{ query }}{% endif %}">Sort by Due Date</a> |
+      <a href="{% url 'index' %}?order=post{% if query %}&q={{ query }}{% endif %}">Sort by Posted Date</a>
     <div class="sort-links">
       <a href="{% url 'index' %}?order=priority">Sort by Priority</a>
       <a href="{% url 'index' %}?order=due">Sort by Due Date</a>
